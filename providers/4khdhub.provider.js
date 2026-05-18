@@ -8,15 +8,13 @@ export default {
     };
   },
 
-  async getHome() {
+  async getHome(){
 
-    try {
+    try{
 
-      console.log(
-        "[4KHDHOME_FETCH_BEGIN]"
-      );
+      console.log("[4KHDHOME_FETCH_BEGIN]");
 
-      const html=
+      const html =
         await window.providerFetch(
           "https://4khdhub.link/"
         );
@@ -26,119 +24,37 @@ export default {
         html.slice(0,500)
       );
 
-      const doc=
-        new DOMParser()
-          .parseFromString(
-            html,
-            "text/html"
-          );
+      // inspect if app data exists in scripts
 
-      const links=[
-        ...doc.querySelectorAll(
-          "a[href]"
-        )
-      ];
-
-      const items=[];
-
-      for(const a of links){
-
-        if(items.length>=5)
-          break;
-
-        const img=
-          a.querySelector(
-            "img"
-          );
-
-        if(!img)
-          continue;
-
-        const title=
-          img.alt?.trim() ||
-          a.title?.trim() ||
-          a.textContent?.trim();
-
-        const pageUrl=
-          a.href;
-
-        const poster=
-          img.src ||
-          img.dataset?.src ||
-          img.getAttribute(
-            "data-lazy-src"
-          ) ||
-          img.getAttribute(
-            "src"
-          );
-
-        console.log(
-          "[CARD_FOUND]",
-          title,
-          pageUrl
-        );
-
-        if(
-          !title ||
-          !poster ||
-          !pageUrl
-        )
-          continue;
-
-        const t=
-          title.toLowerCase();
-
-        const p=
-          poster.toLowerCase();
-
-        if(
-          t.includes("logo") ||
-          p.includes("logo") ||
-          p.includes("/images/")
-        )
-          continue;
-
-        items.push({
-
-          id:
-            "4k-"+items.length,
-
-          title,
-
-          poster,
-
-          backdrop:
-            poster,
-
-          pageUrl,
-
-          type:
-            "movie"
-
-        });
-
-      }
+      const movieMatches =
+        html.match(
+          /"title"\s*:\s*"[^"]+"/g
+        ) || [];
 
       console.log(
-        "[4KHDHOME_PARSED]",
-        items.length
+        "[RAW_TITLE_MATCHES]",
+        movieMatches.length
+      );
+
+      console.log(
+        "[RAW_TITLE_PREVIEW]",
+        movieMatches.slice(0,10)
       );
 
       return {
 
-        featured:
-          items.slice(0,1),
+        featured:[],
 
         rows:[
           {
-            title:"Trending",
-            items
+            title:"Diagnostics",
+            items:[]
           }
         ]
 
       };
 
-    } catch(e){
+    }catch(e){
 
       console.log(
         "[4KHDHOME_FALLBACK]",
@@ -146,10 +62,8 @@ export default {
       );
 
       return {
-
         featured:[],
         rows:[]
-
       };
 
     }
@@ -158,31 +72,14 @@ export default {
 
   async getDetails(item){
 
-    console.log(
-      "[DETAILS_BEGIN]",
-      item?.pageUrl
-    );
-
     return {
-
       ...item,
-
-      description:
-        "Loaded from 4KHDHub"
-
+      description:"Loaded from 4KHDHub"
     };
 
   },
 
   async getSources(content){
-
-    console.log(
-      "[SOURCES_BEGIN]",
-      {
-        pageUrl:
-        content?.pageUrl
-      }
-    );
 
     return {
 
@@ -190,9 +87,7 @@ export default {
         {
           url:
           "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-
-          quality:
-          "1080p"
+          quality:"1080p"
         }
       ]
 
