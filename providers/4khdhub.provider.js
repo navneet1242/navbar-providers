@@ -59,10 +59,30 @@ export default {
         const url =
           a.href;
 
+        // Required fields
         if (
           !title ||
           !poster ||
           !url
+        ) continue;
+
+        const t =
+          title.toLowerCase();
+
+        const p =
+          poster.toLowerCase();
+
+        // Skip site junk/logo/header assets
+        if (
+          t.includes("logo") ||
+          p.includes("logo") ||
+          p.includes("/images/") ||
+          t.includes("4khdhub")
+        ) continue;
+
+        // Skip SVG/header assets
+        if (
+          poster.endsWith(".svg")
         ) continue;
 
         items.push({
@@ -94,7 +114,8 @@ export default {
 
       return {
 
-        featured: items.slice(0,1),
+        featured:
+          items.slice(0,1),
 
         rows:[
           {
