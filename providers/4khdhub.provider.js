@@ -10,75 +10,110 @@ export default {
 
   async getHome() {
 
-    try {
+  try {
 
-      console.log(
-        "[4KHDHOME_FETCH_BEGIN]"
+    console.log("[4KHDHOME_FETCH_BEGIN]");
+
+    const html =
+      await window.providerFetch(
+        "https://4khdhub.link/"
       );
 
-      console.log(
-        "[PF_EXISTS]",
-        typeof window.providerFetch
+    console.log(
+      "[4KHDHOME_HTML]",
+      html.slice(0,500)
+    );
+
+    const doc =
+      new DOMParser().parseFromString(
+        html,
+        "text/html"
       );
 
-      const html =
-        await window.providerFetch(
-          "https://4khdhub.link/"
+    const links = [
+      ...doc.querySelectorAll("a")
+    ];
+
+    const items=[];
+
+    for(const a of links){
+
+      if(items.length>=5)
+        break;
+
+      const img =
+        a.querySelector("img");
+
+      if(!img) continue;
+
+      const title =
+        img.alt?.trim() ||
+        a.title?.trim();
+
+      const poster =
+        img.src ||
+        img.dataset.src ||
+        img.getAttribute(
+          "data-lazy-src"
         );
 
-      console.log(
-        "[4KHDHOME_HTML]",
-        html?.slice(0,500)
-      );
+      if(
+        !title ||
+        !poster
+      ) continue;
 
-      // Temporary test response only
-      // We are NOT parsing yet
+      items.push({
 
-      return {
+        id:
+          "4k-"+items.length,
 
-        featured:[],
+        title,
 
-        rows:[
-          {
-            title:"Bridge Working",
+        poster,
 
-            items:[
-              {
-                id:"bridge-test",
+        backdrop:poster,
 
-                title:"TAURI FETCH SUCCESS",
+        type:"movie"
 
-                poster:
-                  "https://picsum.photos/300/450?bridge",
-
-                backdrop:
-                  "https://picsum.photos/1280/720?bridge",
-
-                type:"movie"
-              }
-            ]
-          }
-        ]
-
-      };
-
-    } catch(e){
-
-      console.log(
-        "[4KHDHOME_FALLBACK]",
-        e?.message
-      );
-
-      return {
-
-        featured:[],
-
-        rows:[]
-
-      };
+      });
 
     }
 
+    console.log(
+      "[4KHDHOME_PARSED]",
+      "count=",
+      items.length
+    );
+
+    return {
+
+      featured:[],
+
+      rows:[
+        {
+          title:"Trending",
+          items
+        }
+      ]
+
+    };
+
+  } catch(e){
+
+    console.log(
+      "[4KHDHOME_FALLBACK]",
+      e?.message
+    );
+
+    return {
+
+      featured:[],
+
+      rows:[]
+
+    };
+
   }
 
+}
 }
