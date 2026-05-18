@@ -2,9 +2,9 @@ export default {
 
   manifest() {
     return {
-      id: "4khdhub",
-      name: "4KHDHub",
-      version: "1.0.0"
+      id:"4khdhub",
+      name:"4KHDHub",
+      version:"1.0.0"
     };
   },
 
@@ -12,9 +12,11 @@ export default {
 
     try {
 
-      console.log("[4KHDHOME_FETCH_BEGIN]");
+      console.log(
+        "[4KHDHOME_FETCH_BEGIN]"
+      );
 
-      const html =
+      const html=
         await window.providerFetch(
           "https://4khdhub.link/"
         );
@@ -24,51 +26,50 @@ export default {
         html.slice(0,500)
       );
 
-      const doc =
+      const doc=
         new DOMParser()
           .parseFromString(
-            html, "text/html"
+            html,
+            "text/html"
           );
 
-      const cards = [
+      const links=[
         ...doc.querySelectorAll(
-          "article, .post, .item, .movie, .card"
+          "a[href]"
         )
       ];
 
-      const items = [];
+      const items=[];
 
-      for (const card of cards) {
+      for(const a of links){
 
-        if (items.length >= 5)
+        if(items.length>=5)
           break;
 
-        const a =
-          card.querySelector(
-            "a[href]"
-          );
-
-        const img =
-          card.querySelector(
+        const img=
+          a.querySelector(
             "img"
           );
 
-        if (!a || !img)
+        if(!img)
           continue;
 
-        const title =
+        const title=
           img.alt?.trim() ||
           a.title?.trim() ||
           a.textContent?.trim();
 
-        const pageUrl =
+        const pageUrl=
           a.href;
 
-        const poster =
+        const poster=
           img.src ||
           img.dataset?.src ||
           img.getAttribute(
             "data-lazy-src"
+          ) ||
+          img.getAttribute(
+            "src"
           );
 
         console.log(
@@ -77,20 +78,20 @@ export default {
           pageUrl
         );
 
-        if (
+        if(
           !title ||
-          !pageUrl ||
-          !poster
+          !poster ||
+          !pageUrl
         )
           continue;
 
-        const t =
+        const t=
           title.toLowerCase();
 
-        const p =
+        const p=
           poster.toLowerCase();
 
-        if (
+        if(
           t.includes("logo") ||
           p.includes("logo") ||
           p.includes("/images/")
@@ -100,7 +101,7 @@ export default {
         items.push({
 
           id:
-            "4k-" + items.length,
+            "4k-"+items.length,
 
           title,
 
@@ -179,7 +180,7 @@ export default {
       "[SOURCES_BEGIN]",
       {
         pageUrl:
-          content?.pageUrl
+        content?.pageUrl
       }
     );
 
