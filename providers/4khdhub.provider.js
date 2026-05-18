@@ -38,7 +38,8 @@ export default {
         const img=
           a.querySelector("img");
 
-        if(!img) continue;
+        if(!img)
+          continue;
 
         const title=
           img.alt?.trim() ||
@@ -73,20 +74,17 @@ export default {
 
         items.push({
 
-          id:
-            "4k-"+items.length,
+          id:"4k-"+items.length,
 
           title,
 
           poster,
 
-          backdrop:
-            poster,
+          backdrop:poster,
 
           url,
 
-          type:
-            "movie"
+          type:"movie"
 
         });
 
@@ -108,11 +106,14 @@ export default {
 
     } catch(e){
 
-      return {
+      console.log(
+        "[4KHDHOME_FALLBACK]",
+        e?.message
+      );
 
+      return {
         featured:[],
         rows:[]
-
       };
 
     }
@@ -134,20 +135,41 @@ export default {
 
       poster:item.poster,
 
-      backdrop:
-        item.backdrop,
+      backdrop:item.backdrop,
 
       description:
         "Loaded from 4KHDHub",
 
       year:
         new Date()
-        .getFullYear(),
+          .getFullYear(),
 
       genres:[],
 
-      type:
-        "movie"
+      type:"movie"
+
+    };
+
+  },
+
+  async getSources(contentId){
+
+    console.log(
+      "[SOURCES_BEGIN]",
+      contentId
+    );
+
+    return {
+
+      sources:[
+        {
+          url:
+            "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+
+          quality:
+            "1080p"
+        }
+      ]
 
     };
 
