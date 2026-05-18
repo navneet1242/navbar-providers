@@ -2,9 +2,9 @@ export default {
 
   manifest() {
     return {
-      id:"4khdhub",
-      name:"4KHDHub",
-      version:"1.0.0"
+      id: "4khdhub",
+      name: "4KHDHub",
+      version: "1.0.0"
     };
   },
 
@@ -12,83 +12,116 @@ export default {
 
     try {
 
+      console.log("[4KHDHOME_FETCH_BEGIN]");
+
       const html =
         await window.providerFetch(
           "https://4khdhub.link/"
         );
 
+      console.log(
+        "[4KHDHOME_HTML]",
+        html.slice(0,500)
+      );
+
       const doc =
         new DOMParser()
           .parseFromString(
-            html,
-            "text/html"
+            html, "text/html"
           );
 
-      const links=[
-        ...doc.querySelectorAll("a")
+      const cards = [
+        ...doc.querySelectorAll(
+          "article, .post, .item, .movie, .card"
+        )
       ];
 
-      const items=[];
+      const items = [];
 
-      for(const a of links){
+      for (const card of cards) {
 
-        if(items.length>=5)
+        if (items.length >= 5)
           break;
 
-        const img=
-          a.querySelector("img");
+        const a =
+          card.querySelector(
+            "a[href]"
+          );
 
-        if(!img)
+        const img =
+          card.querySelector(
+            "img"
+          );
+
+        if (!a || !img)
           continue;
 
-        const title=
+        const title =
           img.alt?.trim() ||
-          a.title?.trim();
+          a.title?.trim() ||
+          a.textContent?.trim();
 
-        const poster=
+        const pageUrl =
+          a.href;
+
+        const poster =
           img.src ||
           img.dataset?.src ||
           img.getAttribute(
             "data-lazy-src"
           );
 
-        const url=a.href;
+        console.log(
+          "[CARD_FOUND]",
+          title,
+          pageUrl
+        );
 
-        if(
+        if (
           !title ||
-          !poster ||
-          !url
-        ) continue;
+          !pageUrl ||
+          !poster
+        )
+          continue;
 
-        const t=
+        const t =
           title.toLowerCase();
 
-        const p=
+        const p =
           poster.toLowerCase();
 
-        if(
+        if (
           t.includes("logo") ||
           p.includes("logo") ||
           p.includes("/images/")
-        ) continue;
+        )
+          continue;
 
         items.push({
 
-          id:"4k-"+items.length,
+          id:
+            "4k-" + items.length,
 
           title,
 
           poster,
 
-          backdrop:poster,
+          backdrop:
+            poster,
 
-          url,
+          pageUrl,
 
-          type:"movie"
+          type:
+            "movie"
 
         });
 
       }
+
+      console.log(
+        "[4KHDHOME_PARSED]",
+        items.length
+      );
 
       return {
 
@@ -112,8 +145,10 @@ export default {
       );
 
       return {
+
         featured:[],
         rows:[]
+
       };
 
     }
@@ -124,39 +159,28 @@ export default {
 
     console.log(
       "[DETAILS_BEGIN]",
-      item?.title
+      item?.pageUrl
     );
 
     return {
 
-      id:item.id,
-
-      title:item.title,
-
-      poster:item.poster,
-
-      backdrop:item.backdrop,
+      ...item,
 
       description:
-        "Loaded from 4KHDHub",
-
-      year:
-        new Date()
-          .getFullYear(),
-
-      genres:[],
-
-      type:"movie"
+        "Loaded from 4KHDHub"
 
     };
 
   },
 
-  async getSources(contentId){
+  async getSources(content){
 
     console.log(
       "[SOURCES_BEGIN]",
-      contentId
+      {
+        pageUrl:
+          content?.pageUrl
+      }
     );
 
     return {
@@ -164,10 +188,10 @@ export default {
       sources:[
         {
           url:
-            "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+          "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
 
           quality:
-            "1080p"
+          "1080p"
         }
       ]
 
