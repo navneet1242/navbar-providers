@@ -2,9 +2,9 @@ export default {
 
   manifest() {
     return {
-      id: "4khdhub",
-      name: "4KHDHub",
-      version: "1.0.0"
+      id:"4khdhub",
+      name:"4KHDHub",
+      version:"1.0.0"
     };
   },
 
@@ -12,83 +12,69 @@ export default {
 
     try {
 
-      console.log("[4KHDHOME_FETCH_BEGIN]");
-
       const html =
         await window.providerFetch(
           "https://4khdhub.link/"
         );
 
-      console.log(
-        "[4KHDHOME_HTML]",
-        html.slice(0,500)
-      );
-
       const doc =
-        new DOMParser().parseFromString(
-          html,
-          "text/html"
-        );
+        new DOMParser()
+          .parseFromString(
+            html,
+            "text/html"
+          );
 
-      const links = [
+      const links=[
         ...doc.querySelectorAll("a")
       ];
 
-      const items = [];
+      const items=[];
 
-      for (const a of links) {
+      for(const a of links){
 
-        if (items.length >= 5)
+        if(items.length>=5)
           break;
 
-        const img =
+        const img=
           a.querySelector("img");
 
-        if (!img)
-          continue;
+        if(!img) continue;
 
-        const title =
+        const title=
           img.alt?.trim() ||
           a.title?.trim();
 
-        const poster =
+        const poster=
           img.src ||
           img.dataset?.src ||
-          img.getAttribute("data-lazy-src");
+          img.getAttribute(
+            "data-lazy-src"
+          );
 
-        const url =
-          a.href;
+        const url=a.href;
 
-        // Required fields
-        if (
+        if(
           !title ||
           !poster ||
           !url
         ) continue;
 
-        const t =
+        const t=
           title.toLowerCase();
 
-        const p =
+        const p=
           poster.toLowerCase();
 
-        // Skip site junk/logo/header assets
-        if (
+        if(
           t.includes("logo") ||
           p.includes("logo") ||
-          p.includes("/images/") ||
-          t.includes("4khdhub")
-        ) continue;
-
-        // Skip SVG/header assets
-        if (
-          poster.endsWith(".svg")
+          p.includes("/images/")
         ) continue;
 
         items.push({
 
           id:
-            "4k-" + items.length,
+            "4k-"+items.length,
 
           title,
 
@@ -106,12 +92,6 @@ export default {
 
       }
 
-      console.log(
-        "[4KHDHOME_PARSED]",
-        "count=",
-        items.length
-      );
-
       return {
 
         featured:
@@ -128,20 +108,48 @@ export default {
 
     } catch(e){
 
-      console.log(
-        "[4KHDHOME_FALLBACK]",
-        e?.message
-      );
-
       return {
 
         featured:[],
-
         rows:[]
 
       };
 
     }
+
+  },
+
+  async getDetails(item){
+
+    console.log(
+      "[DETAILS_BEGIN]",
+      item?.title
+    );
+
+    return {
+
+      id:item.id,
+
+      title:item.title,
+
+      poster:item.poster,
+
+      backdrop:
+        item.backdrop,
+
+      description:
+        "Loaded from 4KHDHub",
+
+      year:
+        new Date()
+        .getFullYear(),
+
+      genres:[],
+
+      type:
+        "movie"
+
+    };
 
   }
 
