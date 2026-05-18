@@ -1,5 +1,12 @@
 {
-  "name": "Navbar Official Repo",
-  "version": "1.0",
-  "providers": []
+  "name":"Navbar Official Repo",
+  "version":"1.0",
+  "providers":[
+    {
+      "id":"4khdhub",
+      "name":"4KHDHub",
+      "version":"1.0.0",
+      "providerUrl":"https://raw.githubusercontent.com/navneet1242/navbar-providers/main/providers/4khdhub.provider.js"
+    }
+  ]
 }
