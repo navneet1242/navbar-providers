@@ -14,41 +14,109 @@ export default {
 
       console.log("[4KHDHOME_FETCH_BEGIN]");
 
-      const html =
+      const html=
         await window.providerFetch(
           "https://4khdhub.link/"
         );
 
+      const doc=
+        new DOMParser()
+        .parseFromString(
+          html,
+          "text/html"
+        );
+
+      const links=[
+        ...doc.querySelectorAll(
+          "a"
+        )
+      ];
+
+      const items=[];
+
+      for(const a of links){
+
+        if(items.length>=5)
+          break;
+
+        const img=
+          a.querySelector("img");
+
+        if(!img)
+          continue;
+
+        const title=
+          img.alt?.trim() ||
+          a.title?.trim();
+
+        const poster=
+          img.src ||
+          img.dataset?.src ||
+          img.getAttribute(
+            "data-lazy-src"
+          );
+
+        const pageUrl=
+          a.href;
+
+        if(
+          !title ||
+          !poster ||
+          !pageUrl
+        ) continue;
+
+        const t=
+          title.toLowerCase();
+
+        const p=
+          poster.toLowerCase();
+
+        if(
+          t.includes("logo") ||
+          p.includes("logo") ||
+          p.includes("/images/")
+        ) continue;
+
+        console.log(
+          "[CARD_FOUND]",
+          title
+        );
+
+        items.push({
+
+          id:
+            "4k-"+items.length,
+
+          title,
+
+          poster,
+
+          backdrop:
+            poster,
+
+          pageUrl,
+
+          type:
+            "movie"
+
+        });
+
+      }
+
       console.log(
-        "[4KHDHOME_HTML]",
-        html.slice(0,500)
+        "[4KHDHOME_PARSED]",
+        items.length
       );
 
-      // inspect if app data exists in scripts
+      return{
 
-      const movieMatches =
-        html.match(
-          /"title"\s*:\s*"[^"]+"/g
-        ) || [];
-
-      console.log(
-        "[RAW_TITLE_MATCHES]",
-        movieMatches.length
-      );
-
-      console.log(
-        "[RAW_TITLE_PREVIEW]",
-        movieMatches.slice(0,10)
-      );
-
-      return {
-
-        featured:[],
+        featured:
+          items.slice(0,1),
 
         rows:[
           {
-            title:"Diagnostics",
-            items:[]
+            title:"Trending",
+            items
           }
         ]
 
@@ -61,9 +129,11 @@ export default {
         e?.message
       );
 
-      return {
+      return{
+
         featured:[],
         rows:[]
+
       };
 
     }
@@ -72,53 +142,30 @@ export default {
 
   async getDetails(item){
 
-    return {
+    console.log(
+      "[DETAIL_PAGEURL]",
+      item?.pageUrl
+    );
+
+    return{
+
       ...item,
-      description:"Loaded from 4KHDHub"
+
+      description:
+        "Loaded from 4KHDHub"
+
     };
 
   },
 
   async getSources(content){
 
-  try{
-
     console.log(
       "[SOURCES_PAGEURL]",
       content?.pageUrl
     );
 
-    const html =
-      await window.providerFetch(
-        content.pageUrl
-      );
-
-    console.log(
-      "[MOVIE_PAGE_HTML]",
-      html.slice(0,3000)
-    );
-
-    const iframeMatches =
-      html.match(
-        /<iframe[^>]+src="([^"]+)"/g
-      ) || [];
-
-    console.log(
-      "[IFRAME_MATCHES]",
-      iframeMatches
-    );
-
-    const lotusMatches =
-      html.match(
-        /lotus|cdn|embed|stream/gi
-      ) || [];
-
-    console.log(
-      "[LOTUS_MATCHES]",
-      lotusMatches
-    );
-
-    return {
+    return{
 
       sources:[
         {
@@ -130,19 +177,6 @@ export default {
 
     };
 
-  }catch(e){
-
-    console.log(
-      "[SOURCE_ERROR]",
-      e?.message
-    );
-
-    return {
-      sources:[]
-    };
-
   }
-
-}
 
 }
