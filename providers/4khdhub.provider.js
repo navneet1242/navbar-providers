@@ -51,13 +51,21 @@ export default {
             "data-lazy-src"
           );
 
-        const url=
-          a.href;
+        const pageUrl=
+          new URL(
+            a.getAttribute("href"),
+            "https://4khdhub.link"
+          ).href;
+
+        console.log(
+          "[PAGEURL_NORMALIZED]",
+          pageUrl
+        );
 
         if(
           !title ||
           !poster ||
-          !url
+          !pageUrl
         ) continue;
 
         const t=
@@ -84,7 +92,7 @@ export default {
           backdrop:
             poster,
 
-          pageUrl:url,
+          pageUrl,
 
           type:"movie"
 
