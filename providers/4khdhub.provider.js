@@ -12,8 +12,6 @@ export default {
 
     try{
 
-      console.log("[4KHDHOME_FETCH_BEGIN]");
-
       const html=
         await window.providerFetch(
           "https://4khdhub.link/"
@@ -21,15 +19,13 @@ export default {
 
       const doc=
         new DOMParser()
-        .parseFromString(
-          html,
-          "text/html"
-        );
+          .parseFromString(
+            html,
+            "text/html"
+          );
 
       const links=[
-        ...doc.querySelectorAll(
-          "a"
-        )
+        ...doc.querySelectorAll("a")
       ];
 
       const items=[];
@@ -42,8 +38,7 @@ export default {
         const img=
           a.querySelector("img");
 
-        if(!img)
-          continue;
+        if(!img) continue;
 
         const title=
           img.alt?.trim() ||
@@ -56,13 +51,13 @@ export default {
             "data-lazy-src"
           );
 
-        const pageUrl=
+        const url=
           a.href;
 
         if(
           !title ||
           !poster ||
-          !pageUrl
+          !url
         ) continue;
 
         const t=
@@ -77,11 +72,6 @@ export default {
           p.includes("/images/")
         ) continue;
 
-        console.log(
-          "[CARD_FOUND]",
-          title
-        );
-
         items.push({
 
           id:
@@ -94,46 +84,29 @@ export default {
           backdrop:
             poster,
 
-          pageUrl,
+          pageUrl:url,
 
-          type:
-            "movie"
+          type:"movie"
 
         });
 
       }
 
-      console.log(
-        "[4KHDHOME_PARSED]",
-        items.length
-      );
-
       return{
-
-        featured:
-          items.slice(0,1),
-
+        featured:items.slice(0,1),
         rows:[
           {
             title:"Trending",
             items
           }
         ]
-
       };
 
     }catch(e){
 
-      console.log(
-        "[4KHDHOME_FALLBACK]",
-        e?.message
-      );
-
       return{
-
         featured:[],
         rows:[]
-
       };
 
     }
@@ -143,39 +116,125 @@ export default {
   async getDetails(item){
 
     console.log(
-      "[DETAIL_PAGEURL]",
-      item?.pageUrl
+      "[DETAIL_IN]",
+      item
     );
 
-    return{
-
+    const details={
       ...item,
+
+      pageUrl:
+        item.pageUrl ||
+        item.sourceUrl,
+
+      sourceUrl:
+        item.sourceUrl ||
+        item.pageUrl,
 
       description:
         "Loaded from 4KHDHub"
-
     };
+
+    console.log(
+      "[DETAIL_OUT]",
+      details
+    );
+
+    return details;
 
   },
 
   async getSources(content){
 
     console.log(
+      "[SOURCES_CONTENT]",
+      content
+    );
+
+    console.log(
       "[SOURCES_PAGEURL]",
       content?.pageUrl
     );
 
-    return{
+    try{
 
-      sources:[
-        {
-          url:
-          "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-          quality:"1080p"
-        }
-      ]
+      const extracted=
+        await extractContent(
+          content.pageUrl ||
+          content.sourceUrl
+        );
 
-    };
+      console.log(
+        "[EXTRACT_CONTENT_RESULT]",
+        extracted
+      );
+
+      let hubLink=null;
+
+      if(
+        extracted?.type==="movie" &&
+        extracted.groups?.length
+      ){
+        hubLink=
+          extracted.groups[0]?.url;
+      }
+
+      if(
+        extracted?.type==="series" &&
+        extracted.seasons?.length
+      ){
+        hubLink=
+          extracted.seasons[0]
+            ?.episodes?.[0]
+            ?.qualities?.[0]
+            ?.url;
+      }
+
+      if(
+        !hubLink ||
+        !/hubcloud|hubdrive/i.test(hubLink)
+      ){
+        return{
+          sources:[]
+        };
+      }
+
+      const finalUrl=
+        await resolveStream(
+          hubLink
+        );
+
+      console.log(
+        "[REAL_STREAM_RESULT]",
+        finalUrl
+      );
+
+      return{
+
+        sources:[
+          {
+            url:
+              finalUrl,
+
+            quality:
+              "Auto"
+          }
+        ]
+
+      };
+
+    }catch(e){
+
+      console.log(
+        "[REAL_STREAM_RESULT]",
+        e?.message
+      );
+
+      return{
+        sources:[]
+      };
+
+    }
 
   }
 
