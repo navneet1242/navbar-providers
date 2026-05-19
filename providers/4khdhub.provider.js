@@ -81,6 +81,43 @@ export default {
 
   async getSources(content){
 
+  try{
+
+    console.log(
+      "[SOURCES_PAGEURL]",
+      content?.pageUrl
+    );
+
+    const html =
+      await window.providerFetch(
+        content.pageUrl
+      );
+
+    console.log(
+      "[MOVIE_PAGE_HTML]",
+      html.slice(0,3000)
+    );
+
+    const iframeMatches =
+      html.match(
+        /<iframe[^>]+src="([^"]+)"/g
+      ) || [];
+
+    console.log(
+      "[IFRAME_MATCHES]",
+      iframeMatches
+    );
+
+    const lotusMatches =
+      html.match(
+        /lotus|cdn|embed|stream/gi
+      ) || [];
+
+    console.log(
+      "[LOTUS_MATCHES]",
+      lotusMatches
+    );
+
     return {
 
       sources:[
@@ -93,6 +130,19 @@ export default {
 
     };
 
+  }catch(e){
+
+    console.log(
+      "[SOURCE_ERROR]",
+      e?.message
+    );
+
+    return {
+      sources:[]
+    };
+
   }
+
+}
 
 }
